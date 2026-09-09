@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Buck and Bacon</title>
+  <meta name="description" content="Venison + pork sausage scaler. Salt, cure, seasonings, and casing footage for deer sausage.">
+  <meta name="theme-color" content="#121212">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Buck & Bacon">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="apple-touch-startup-image" href="splash.png">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="splash">
+    <img src="splash.png" alt="Buck kicked back with a cigar">
+    <div class="enter-wrap">
+      <div class="brand">Buck and Bacon</div>
+      <button type="button" class="enter" id="splash-enter">Enter</button>
+    </div>
+  </div>
+
+  <div class="app">
+    <header class="header">
+      <button type="button" class="icon-btn hidden" id="btn-back" aria-label="Back">←</button>
+      <img class="logo" src="icon-192.png" alt="" width="44" height="44">
+      <div class="grow">
+        <h1 id="header-title">Buck and Bacon</h1>
+        <p class="sub" id="header-sub">Venison sausage scaler</p>
+      </div>
+      <button type="button" class="icon-btn" id="btn-convert" aria-label="Unit converter">⚖</button>
+      <button type="button" class="icon-btn" id="btn-menu" aria-label="Menu">☰</button>
+    </header>
+
+    <div id="menu" class="menu hidden">
+      <button type="button" data-go="home">Recipes</button>
+      <button type="button" data-go="tools">Converters</button>
+      <button type="button" data-go="about">Safety &amp; sources</button>
+    </div>
+
+    <main>
+      <section id="view-home" class="view">
+        <img class="hero-splash" src="splash.png" alt="">
+        <p class="lede">Enter pounds of venison and pork. The app scales salt, seasonings, and a computed Cure #1 amount for the recipe you pick.</p>
+        <div id="recipe-list" class="recipe-list"></div>
+      </section>
+
+      <section id="view-batch" class="view hidden">
+        <p class="kicker" id="batch-kicker">Sausage</p>
+        <h2 class="recipe-title" id="batch-title"></h2>
+        <p class="lede" id="batch-tag"></p>
+        <div id="batch-copycat" class="banner note hidden"></div>
+
+        <div class="inputs">
+          <div class="field">
+            <label for="venison-lb">Venison (lb)</label>
+            <input id="venison-lb" type="number" inputmode="decimal" min="0" step="0.1" placeholder="8">
+          </div>
+          <div class="field" id="pork-field">
+            <label for="pork-lb">Pork (lb)</label>
+            <input id="pork-lb" type="number" inputmode="decimal" min="0" step="0.1" placeholder="2">
+          </div>
+        </div>
+        <p class="lede" id="fat-hint"></p>
+        <div class="totals" id="batch-totals"></div>
+        <div id="batch-results"></div>
+      </section>
+
+      <section id="view-hamburger" class="view hidden">
+        <p class="kicker">Not a sausage</p>
+        <h2 class="recipe-title">Hamburger fat-ratio</h2>
+        <p class="lede">Grind math only. Tells you how much pork fat (or fatty pork) to add to venison so burgers hit a target fat %. No cure, no casing, no sausage seasoning.</p>
+
+        <div class="inputs">
+          <div class="field">
+            <label for="h-venison">Venison (lb)</label>
+            <input id="h-venison" type="number" inputmode="decimal" min="0" step="0.1" placeholder="10">
+          </div>
+          <div class="field">
+            <label for="h-vfat">Venison fat %</label>
+            <input id="h-vfat" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="5">
+          </div>
+          <div class="field full">
+            <label>Target blend</label>
+            <div class="chip-row" id="h-targets"></div>
+          </div>
+          <div class="field full">
+            <label for="h-source">Fat source</label>
+            <select id="h-source"></select>
+          </div>
+        </div>
+        <p class="lede" id="h-source-hint"></p>
+        <div id="h-results"></div>
+
+        <h3 class="section-label">Already have both meats?</h3>
+        <p class="lede">See the fat % of a grind you already weighed.</p>
+        <div class="inputs">
+          <div class="field">
+            <label for="h2-venison">Venison (lb)</label>
+            <input id="h2-venison" type="number" inputmode="decimal" min="0" step="0.1">
+          </div>
+          <div class="field">
+            <label for="h2-vfat">Venison fat %</label>
+            <input id="h2-vfat" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="5">
+          </div>
+          <div class="field">
+            <label for="h2-pork">Pork (lb)</label>
+            <input id="h2-pork" type="number" inputmode="decimal" min="0" step="0.1">
+          </div>
+          <div class="field">
+            <label for="h2-pfat">Pork fat %</label>
+            <input id="h2-pfat" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="30">
+          </div>
+        </div>
+        <div id="h2-results"></div>
+      </section>
+
+      <section id="view-tools" class="view hidden">
+        <h2 class="recipe-title">Converters</h2>
+        <p class="lede">Always available from the scale button in the header, too. DH-style recipes are grams of spice per kilogram of meat.</p>
+
+        <h3 class="section-label">Unit converter</h3>
+        <div class="inputs">
+          <div class="field">
+            <label for="c-from-val">Amount</label>
+            <input id="c-from-val" type="number" inputmode="decimal" step="any" value="1">
+          </div>
+          <div class="field">
+            <label for="c-from-unit">From</label>
+            <select id="c-from-unit">
+              <option value="g">grams (g)</option>
+              <option value="kg">kilograms (kg)</option>
+              <option value="lb" selected>pounds (lb)</option>
+              <option value="oz">ounces (oz)</option>
+            </select>
+          </div>
+        </div>
+        <div id="c-results" class="ing-list"></div>
+
+        <h3 class="section-label">g/kg → batch helper</h3>
+        <p class="lede">Have a shop formula in grams per kilogram? Enter the rate and your meat weight.</p>
+        <div class="inputs">
+          <div class="field">
+            <label for="m-rate">g per kg</label>
+            <input id="m-rate" type="number" inputmode="decimal" step="any" placeholder="18">
+          </div>
+          <div class="field">
+            <label for="m-meat">Meat</label>
+            <input id="m-meat" type="number" inputmode="decimal" step="any" placeholder="10">
+          </div>
+          <div class="field full">
+            <label for="m-unit">Meat unit</label>
+            <select id="m-unit">
+              <option value="lb" selected>pounds</option>
+              <option value="kg">kilograms</option>
+            </select>
+          </div>
+        </div>
+        <div id="m-results"></div>
+      </section>
+
+      <section id="view-about" class="view hidden">
+        <img class="hero-splash" src="splash.png" alt="">
+        <h2 class="recipe-title">Safety &amp; sources</h2>
+        <div class="prose">
+          <p><strong>Buck and Bacon</strong> is a home sausage scaler for Frank Mulkey. It is not USDA inspection, not a substitute for your cure product’s label, and not medical or legal advice.</p>
+          <h2>Cure #1</h2>
+          <p>Cure amounts are <em>computed</em>, never copied from recipes or videos. The app assumes <strong>Cure #1 (Prague Powder #1 / Instacure #1)</strong> at <strong>2.5 g per kg</strong> of total meat, which is the same rate as <strong>1 oz per 25 lb</strong> (~156 ppm sodium nitrite when the product is 6.25% nitrite).</p>
+          <p>Confirm against the jar in your hand. Some pink salts are a different concentration. Do not use Cure #2 for these cooked/smoked sausages. Weigh cure on a gram scale.</p>
+          <h2>DH Custom Sausage notes</h2>
+          <p>Seasoning formulas follow Duncan Henry’s public method: ingredients as <strong>grams per kilogram of meat</strong> so the math stays in tenths. Shop videos are used for style (garlic kielbasa, snack sticks, breakfast sage), not for nitrite numbers.</p>
+          <h2>Phase 2 (not built)</h2>
+          <ul>
+            <li>Canned / pressed ham</li>
+            <li>Bologna</li>
+            <li>Shopping list generator</li>
+            <li>Smoking schedules</li>
+            <li>Saved-batch log</li>
+          </ul>
+          <p>Full citations live in the README.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="sheet-backdrop" class="sheet-backdrop hidden"></div>
+  <div id="sheet" class="sheet hidden" role="dialog" aria-label="Unit converter">
+    <div class="sheet-handle"></div>
+    <h2 class="recipe-title" style="font-size:1.2rem">Converter</h2>
+    <div class="inputs">
+      <div class="field">
+        <label for="s-val">Amount</label>
+        <input id="s-val" type="number" inputmode="decimal" step="any" value="1">
+      </div>
+      <div class="field">
+        <label for="s-unit">From</label>
+        <select id="s-unit">
+          <option value="g">g</option>
+          <option value="kg">kg</option>
+          <option value="lb" selected>lb</option>
+          <option value="oz">oz</option>
+        </select>
+      </div>
+    </div>
+    <div id="s-results" class="ing-list"></div>
+    <button type="button" class="ghost" id="sheet-close">Close</button>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

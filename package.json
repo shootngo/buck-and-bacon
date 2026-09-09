@@ -1,0 +1,10 @@
+{
+  "name": "buck-and-bacon",
+  "private": true,
+  "type": "module",
+  "description": "Venison + pork sausage scaler PWA (Phase 1)",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "serve": "python3 -m http.server 8080"
+  }
+}
