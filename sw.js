@@ -1,5 +1,5 @@
 /* Buck and Bacon service worker — cache name unique vs Nickey / Stashr */
-const CACHE = "buck-and-bacon-v1";
+const CACHE = "buck-and-bacon-v2";
 const SHELL = [
   "./",
   "./index.html",

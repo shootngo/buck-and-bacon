@@ -148,11 +148,11 @@
         <div class="inputs">
           <div class="field">
             <label for="m-rate">g per kg</label>
-            <input id="m-rate" type="number" inputmode="decimal" step="any" placeholder="18">
+            <input id="m-rate" type="number" inputmode="decimal" step="any" value="18">
           </div>
           <div class="field">
             <label for="m-meat">Meat</label>
-            <input id="m-meat" type="number" inputmode="decimal" step="any" placeholder="10">
+            <input id="m-meat" type="number" inputmode="decimal" step="any" value="10">
           </div>
           <div class="field full">
             <label for="m-unit">Meat unit</label>
@@ -162,6 +162,7 @@
             </select>
           </div>
         </div>
+        <button type="button" class="primary" id="m-go">Scale this rate</button>
         <div id="m-results"></div>
       </section>
 

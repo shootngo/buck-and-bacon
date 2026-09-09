@@ -481,10 +481,11 @@ function bind() {
     saveState();
     renderHamburger({});
   });
-  ["c-from-val", "c-from-unit", "m-rate", "m-meat", "m-unit", "s-val", "s-unit"].forEach((id) => {
-    $(id).addEventListener("input", updateConverters);
-    $(id).addEventListener("change", updateConverters);
-  });
+  $("view-tools").addEventListener("input", updateConverters);
+  $("view-tools").addEventListener("change", updateConverters);
+  $("m-go").addEventListener("click", updateConverters);
+  $("sheet").addEventListener("input", updateConverters);
+  $("sheet").addEventListener("change", updateConverters);
   window.addEventListener("hashchange", parseHash);
 }
 
