@@ -547,7 +547,7 @@ function renderButchering() {
   if (route.name === "cut") {
     const found = getCut(route.animalId, route.cutId);
     $("btn-back").classList.remove("hidden");
-    $("header-title").textContent = found.cut.name;
+    $("header-title").textContent = found.cut.name.replace(/\s*\([^)]*\)/g, "").trim();
     $("header-sub").textContent = found.animal.shortName;
     root.innerHTML = cutPageHtml(found.animal, found.cut);
     bindCutMap(root);
@@ -606,6 +606,7 @@ function renderCure(opts = {}) {
 }
 
 function render(opts = {}) {
+  if (opts.hydrate) window.scrollTo(0, 0);
   const name = state.route.name;
   if (name === "sausage") renderSausage();
   else if (name === "batch") renderBatch(opts);
