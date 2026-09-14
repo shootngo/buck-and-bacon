@@ -97,7 +97,9 @@ npm test          # Node test runner — cure, scaling, converter, casing, fat b
 python3 -m http.server 8080
 ```
 
-No build step. ES modules, service worker `buck-and-bacon-v1`.
+No build step. ES modules, service worker `buck-and-bacon-v1.1` (visible app version **V 1.1**).
+
+Hamburger ☰ → **Check for update** asks the service worker / `version.json` for a newer deploy. If one is waiting, it activates and reloads. If you’re already current, you get a short toast: *You’re on the latest version (V 1.1).* The existing auto “new version” banner still appears when a worker installs in the background.
 
 ## Phase 2 — parked, do not build here
 

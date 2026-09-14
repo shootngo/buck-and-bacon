@@ -1,5 +1,6 @@
 {
   "name": "buck-and-bacon",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Venison + pork sausage scaler PWA (Phase 1)",
