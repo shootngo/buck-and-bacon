@@ -1,5 +1,6 @@
 import {
   blendFatPercent,
+  computeCure,
   convert,
   fatToAdd,
   formatFeet,
@@ -28,18 +29,35 @@ import {
   shouldActivateUpdate,
   updateFoundMessage,
 } from "./update.js";
+import { backRoute, hashFor, isButcheringRoute, parseRoute } from "./routes.js";
+import { createStayOnController } from "./wakelock.js";
+import { getAnimal, getCut } from "./cuts.js";
+import { getJerkyTopic } from "./jerky.js";
+import {
+  animalPageHtml,
+  butcheringHomeHtml,
+  cureExtrasHtml,
+  cutPageHtml,
+  jerkyHomeHtml,
+  jerkyTopicHtml,
+  stayOnToggleHtml,
+  toolsPageHtml,
+} from "./phase2.js";
 
 const STORAGE = "bnb-v1";
 const $ = (id) => document.getElementById(id);
 
+const stayOn = createStayOnController();
+
 const state = {
-  view: "home",
+  route: { name: "butchering" },
   recipeId: null,
   venison: 8,
   pork: 2,
   includeOptional: {},
   hTarget: 20,
   hSource: "pork-fat",
+  cureMeatLb: 10,
 };
 
 function loadState() {
@@ -60,6 +78,7 @@ function saveState() {
       pork: state.pork,
       hTarget: state.hTarget,
       hSource: state.hSource,
+      cureMeatLb: state.cureMeatLb,
     }),
   );
 }
@@ -75,6 +94,7 @@ function hideSplash() {
   if (!splash || splash.classList.contains("hidden")) return;
   splash.classList.add("hidden");
   sessionStorage.setItem("bnb-splash", "1");
+  applyStayOn();
 }
 
 function setupSplash() {
@@ -86,20 +106,12 @@ function setupSplash() {
   setTimeout(hideSplash, 2200);
 }
 
-function hashFor(view, recipeId) {
-  if (view === "tools") return "#/tools";
-  if (view === "about") return "#/about";
-  if (view === "hamburger") return "#/recipe/hamburger";
-  if (view === "batch" && recipeId) return `#/recipe/${recipeId}`;
-  return "#/";
-}
-
-function go(view, recipeId) {
-  state.view = view;
-  if (recipeId) state.recipeId = recipeId;
+function go(route) {
+  if (typeof route === "string") route = { name: route };
   $("menu").classList.add("hidden");
-  const next = hashFor(view, state.recipeId);
-  if (location.hash === next || (next === "#/" && !location.hash)) {
+  const next = hashFor(route);
+  if (location.hash === next || (next === "#/butchering" && !location.hash)) {
+    state.route = route;
     render({ hydrate: true });
   } else {
     location.hash = next;
@@ -107,16 +119,39 @@ function go(view, recipeId) {
 }
 
 function parseHash() {
-  const h = (location.hash || "#/").replace(/^#/, "");
-  if (h.startsWith("/recipe/")) {
-    const id = h.slice("/recipe/".length);
-    const recipe = getRecipe(id);
-    if (!recipe) return go("home");
-    state.recipeId = id;
-    state.view = recipe.kind === "hamburger" ? "hamburger" : "batch";
-  } else if (h.startsWith("/tools")) state.view = "tools";
-  else if (h.startsWith("/about") ) state.view = "about";
-  else state.view = "home";
+  const route = parseRoute(location.hash);
+  if (route.name === "recipe") {
+    const recipe = getRecipe(route.recipeId);
+    if (!recipe) {
+      go({ name: "sausage" });
+      return;
+    }
+    state.recipeId = route.recipeId;
+    state.route =
+      recipe.kind === "hamburger"
+        ? { name: "hamburger", recipeId: recipe.id }
+        : { name: "batch", recipeId: recipe.id };
+  } else if (route.name === "animal") {
+    if (!getAnimal(route.animalId)) {
+      go({ name: "butchering" });
+      return;
+    }
+    state.route = route;
+  } else if (route.name === "cut") {
+    if (!getCut(route.animalId, route.cutId)) {
+      go({ name: "animal", animalId: route.animalId });
+      return;
+    }
+    state.route = route;
+  } else if (route.name === "jerky-topic") {
+    if (!getJerkyTopic(route.topicId)) {
+      go({ name: "jerky" });
+      return;
+    }
+    state.route = route;
+  } else {
+    state.route = route;
+  }
   render({ hydrate: true });
 }
 
@@ -132,11 +167,11 @@ function cureBadge(recipe) {
   return `<span class="badge badge-fresh">No cure</span>`;
 }
 
-function renderHome() {
+function renderSausage() {
   showView("view-home");
-  $("btn-back").classList.add("hidden");
-  $("header-title").textContent = "Buck and Bacon";
-  $("header-sub").textContent = "Venison sausage scaler";
+  $("btn-back").classList.remove("hidden");
+  $("header-title").textContent = "Sausage";
+  $("header-sub").textContent = "Scale a batch";
   $("recipe-list").innerHTML = RECIPES.map(
     (r) => `
     <button type="button" class="recipe-card" data-recipe="${r.id}">
@@ -148,14 +183,13 @@ function renderHome() {
   $("recipe-list").onclick = (e) => {
     const btn = e.target.closest("[data-recipe]");
     if (!btn) return;
-    const recipe = getRecipe(btn.dataset.recipe);
-    go(recipe.kind === "hamburger" ? "hamburger" : "batch", recipe.id);
+    go({ name: "recipe", recipeId: btn.dataset.recipe });
   };
 }
 
 function renderBatch(opts = {}) {
   const recipe = getRecipe(state.recipeId);
-  if (!recipe || recipe.kind === "hamburger") return renderHome();
+  if (!recipe || recipe.kind === "hamburger") return renderSausage();
   showView("view-batch");
   $("btn-back").classList.remove("hidden");
   $("header-title").textContent = recipe.name;
@@ -434,15 +468,155 @@ function renderAbout() {
   showView("view-about");
   $("btn-back").classList.remove("hidden");
   $("header-title").textContent = "About";
-  $("header-sub").textContent = "Safety · DH notes · Phase 2";
+  $("header-sub").textContent = "Safety · DH notes · V 1.2";
+}
+
+function bindCutMap(root) {
+  const svg = root.querySelector(".cut-svg");
+  if (!svg) return;
+  const animalId = state.route.animalId;
+  const open = (cutId) => {
+    if (!cutId || !animalId) return;
+    go({ name: "cut", animalId, cutId });
+  };
+  svg.addEventListener("click", (e) => {
+    const region = e.target.closest("[data-cut]");
+    if (region) open(region.dataset.cut);
+  });
+  svg.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const region = e.target.closest("[data-cut]");
+    if (!region) return;
+    e.preventDefault();
+    open(region.dataset.cut);
+  });
+}
+
+function paintStayOn() {
+  const inButchering = isButcheringRoute(state.route);
+  const slot = $("stay-on-slot");
+  if (!slot) return;
+  const enabled = stayOn.enabled;
+  if (!inButchering && !enabled) {
+    slot.innerHTML = "";
+    slot.classList.add("hidden");
+    return;
+  }
+  slot.classList.remove("hidden");
+  slot.innerHTML = stayOnToggleHtml({
+    enabled,
+    label: stayOn.label(),
+    prominent: inButchering,
+  });
+}
+
+function applyStayOn() {
+  stayOn.syncForView(isButcheringRoute(state.route));
+  paintStayOn();
+  if (stayOn.enabled) stayOn.acquire();
+  else stayOn.release();
+}
+
+async function toggleStayOn() {
+  const next = !stayOn.enabled;
+  await stayOn.setEnabled(next);
+  paintStayOn();
+  showToast(next ? stayOn.label() : "Screen stay-on off");
+}
+
+function renderButchering() {
+  showView("view-butchering");
+  const root = $("butchering-root");
+  const route = state.route;
+  if (route.name === "butch-tools") {
+    $("btn-back").classList.remove("hidden");
+    $("header-title").textContent = "Tools";
+    $("header-sub").textContent = "Shop kit";
+    root.innerHTML = toolsPageHtml();
+    return;
+  }
+  if (route.name === "animal") {
+    const animal = getAnimal(route.animalId);
+    $("btn-back").classList.remove("hidden");
+    $("header-title").textContent = animal.shortName;
+    $("header-sub").textContent = "Tap a cut";
+    root.innerHTML = animalPageHtml(animal);
+    bindCutMap(root);
+    return;
+  }
+  if (route.name === "cut") {
+    const found = getCut(route.animalId, route.cutId);
+    $("btn-back").classList.remove("hidden");
+    $("header-title").textContent = found.cut.name.replace(/\s*\([^)]*\)/g, "").trim();
+    $("header-sub").textContent = found.animal.shortName;
+    root.innerHTML = cutPageHtml(found.animal, found.cut);
+    bindCutMap(root);
+    return;
+  }
+  $("btn-back").classList.add("hidden");
+  $("header-title").textContent = "Butchering";
+  $("header-sub").textContent = "Cuts of meat";
+  root.innerHTML = butcheringHomeHtml();
+}
+
+function renderJerky() {
+  showView("view-jerky");
+  $("btn-back").classList.remove("hidden");
+  const root = $("jerky-root");
+  if (state.route.name === "jerky-topic") {
+    const topic = getJerkyTopic(state.route.topicId);
+    $("header-title").textContent = topic.name;
+    $("header-sub").textContent = "Jerky";
+    root.innerHTML = jerkyTopicHtml(topic);
+    return;
+  }
+  $("header-title").textContent = "Jerky";
+  $("header-sub").textContent = "Cuts · process · marinades";
+  root.innerHTML = jerkyHomeHtml();
+}
+
+function renderCure(opts = {}) {
+  showView("view-cure");
+  $("btn-back").classList.remove("hidden");
+  $("header-title").textContent = "Curing";
+  $("header-sub").textContent = "Cure #1 · old-time notes";
+  if (opts.hydrate) {
+    $("cure-meat-lb").value = state.cureMeatLb || "";
+  }
+  $("cure-extras").innerHTML = cureExtrasHtml();
+  const lb = parseNum($("cure-meat-lb"), 0);
+  state.cureMeatLb = lb;
+  saveState();
+  if (lb <= 0) {
+    $("cure-results").innerHTML = `<p class="empty">Enter meat pounds to compute Cure #1.</p>`;
+    return;
+  }
+  const cure = computeCure(lb);
+  $("cure-results").innerHTML = `
+    <div class="banner cure-yes">
+      <h3>Cure #1 for ${formatPounds(lb)} lb meat</h3>
+      <div class="cure-amount">${formatMassGrams(cure.grams)} g</div>
+      <div class="cure-sub">${formatOunces(cure.ounces)} oz
+        · ~${formatTsp(cure.teaspoonsApprox)} tsp (approx)</div>
+      <p class="warn-copy"><strong>Assumes ${CURE_ASSUMPTION.name}</strong> at ${CURE_ASSUMPTION.gramsPerKg} g/kg
+      (${CURE_ASSUMPTION.ouncesPer25Lb} oz per 25 lb), targeting ~${CURE_ASSUMPTION.targetPpm} ppm sodium nitrite
+      when the product is ${CURE_ASSUMPTION.nitritePercent}% nitrite.
+      ${CURE_ASSUMPTION.labelWarning}</p>
+    </div>`;
 }
 
 function render(opts = {}) {
-  if (state.view === "home") renderHome();
-  else if (state.view === "batch") renderBatch(opts);
-  else if (state.view === "hamburger") renderHamburger(opts);
-  else if (state.view === "tools") renderTools();
-  else if (state.view === "about") renderAbout();
+  if (opts.hydrate) window.scrollTo(0, 0);
+  const name = state.route.name;
+  if (name === "sausage") renderSausage();
+  else if (name === "batch") renderBatch(opts);
+  else if (name === "hamburger") renderHamburger(opts);
+  else if (name === "tools") renderTools();
+  else if (name === "about") renderAbout();
+  else if (name === "jerky" || name === "jerky-topic") renderJerky();
+  else if (name === "cure") renderCure(opts);
+  else renderButchering();
+  applyStayOn();
 }
 
 function paintVersion() {
@@ -564,7 +738,7 @@ async function checkForUpdate() {
 }
 
 function bind() {
-  $("btn-back").addEventListener("click", () => go("home"));
+  $("btn-back").addEventListener("click", () => go(backRoute(state.route)));
   $("btn-menu").addEventListener("click", (e) => {
     e.stopPropagation();
     $("menu").classList.toggle("hidden");
@@ -579,7 +753,12 @@ function bind() {
       return;
     }
     const goTo = btn.dataset.go;
-    if (goTo) go(goTo);
+    if (goTo) go({ name: goTo });
+  });
+  $("stay-on-slot").addEventListener("click", (e) => {
+    if (!e.target.closest("[data-action='stay-on']")) return;
+    e.stopPropagation();
+    toggleStayOn();
   });
   $("btn-convert").addEventListener("click", (e) => {
     e.stopPropagation();
@@ -617,6 +796,12 @@ function bind() {
   $("m-go").addEventListener("click", updateConverters);
   $("sheet").addEventListener("input", updateConverters);
   $("sheet").addEventListener("change", updateConverters);
+  $("cure-meat-lb").addEventListener("input", () => renderCure({}));
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && stayOn.enabled) stayOn.acquire();
+    });
+  }
   window.addEventListener("hashchange", parseHash);
 }
 

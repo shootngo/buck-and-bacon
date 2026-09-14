@@ -1,10 +1,10 @@
 # Buck and Bacon
 
-Mobile-first PWA that scales **venison + pork** sausage batches: salt, seasonings, a **computed** Cure #1 amount, and a casing-footage estimate.
+Mobile-first PWA for **Frank Mulkey**: Phase 2 **Butchering** cut charts (select animal → view cuts → tap for how-to), plus the Phase 1 **venison + pork** sausage scaler (salt, computed Cure #1, casing footage), a jerky starter, and a standalone cure calculator.
 
 Owner: **Frank Mulkey** ([shootngo](https://github.com/shootngo)). Same idea as Nickey / Stashr: static GitHub Pages, Add to Home Screen, large tap targets, no login.
 
-**Phase 1 is this repo. Phase 2 is parked below — not implemented.**
+**Current version: V 1.2.**
 
 ## Live URL
 
@@ -16,7 +16,7 @@ Until Pages is on, use the repo / PR. Local: `python3 -m http.server 8080` and o
 
 ### Enable GitHub Pages (from `main` / root)
 
-1. Merge the Phase 1 PR into `main`.
+1. Merge to `main`.
 2. Repo **Settings → Pages**.
 3. **Source:** Deploy from a branch.
 4. **Branch:** `main` · **folder:** `/ (root)`.
@@ -24,7 +24,17 @@ Until Pages is on, use the repo / PR. Local: `python3 -m http.server 8080` and o
 
 PWA `start_url` / `scope` are relative (`./`), so Add to Home Screen works on that Pages path. App `id` is `/buck-and-bacon/` so it will not collide with Nickey or Stashr.
 
-## What Phase 1 does
+## Hamburger ☰
+
+1. **Butchering** — deer/venison, hog/pork, beef, chicken. Numbered cut chart, tap a cut for how-to, uses, and links into sausage / jerky / cure.
+2. **Sausage recipes** — the Phase 1 scaler (including hamburger fat-ratio).
+3. **Jerky** — best cuts, USDA heat-then-dry notes, marinade starters.
+4. **Curing & preserving** — standalone Cure #1 calculator plus old-time starter notes (bacon belly, salt pork, equilibrium salt).
+5. Converters · Safety & sources · **Check for update**
+
+**Screen stay-on** sits under the header in Butchering (default **on**). It uses the Screen Wake Lock API so the phone doesn’t sleep on the cutting table. Turn it off anytime; while it is on it stays on in other sections too.
+
+## What Phase 1 sausage still does
 
 Enter **pounds of venison** and **pounds of pork**. Total meat = venison + pork. Every seasoning rate is **grams per kilogram of that total**.
 
@@ -82,6 +92,9 @@ Seasonings follow the public DH method: formulate in **g/kg of meat** because ki
 - Double D Meat Company site / product copy (mild Cajun, sugar-cured ham heritage) — **no official recipe**; this is an unaffiliated mild smoked-sausage copycat
 - NZ Casings — hog 32–35 mm ≈ 2.7 ft/lb; sheep ≈ 4.7 ft/lb: https://www.nzcasings.com/pages/casing-sizing
 - LEM / butcher supply — 2½ × 20 in fibrous ≈ 3 lb per chub
+- NDSU Extension — Wild Side of the Menu No. 2, Field to Freezer (muscle-boning deer): https://www.ndsu.edu/agriculture/extension/publications/wild-side-menu-no-2-field-freezer
+- NMSU Extension — Processing your deer at home: https://pubs.nmsu.edu/_circulars/CR508/index.html
+- USDA FSIS — Jerky and food safety (160°F red meat / 165°F poultry before drying): https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/meat/jerky
 - Meats and Sausages / USDA comminuted-product nitrite — 2.5 g Cure #1 per kg ≈ 156 ppm: https://www.meatsandsausages.com/drying-preservation/preserving-meat/curing
 
 Casing numbers include ~10% extra for waste. They are estimates, not a packing-house spec.
@@ -97,11 +110,13 @@ npm test          # Node test runner — cure, scaling, converter, casing, fat b
 python3 -m http.server 8080
 ```
 
-No build step. ES modules, service worker `buck-and-bacon-v1.1` (visible app version **V 1.1**).
+No build step. ES modules, service worker `buck-and-bacon-v1.2` (visible app version **V 1.2**).
 
-Hamburger ☰ → **Check for update** asks the service worker / `version.json` for a newer deploy. If one is waiting, it activates and reloads. If you’re already current, you get a short toast: *You’re on the latest version (V 1.1).* The existing auto “new version” banner still appears when a worker installs in the background.
+Hamburger ☰ → **Check for update** asks the service worker / `version.json` for a newer deploy. If one is waiting, it activates and reloads. If you’re already current, you get a short toast: *You’re on the latest version (V 1.2).* The existing auto “new version” banner still appears when a worker installs in the background.
 
-## Phase 2 — parked, do not build here
+Butchering how-to is home-processor shop talk (NDSU Field to Freezer, NMSU deer circular, USDA FSIS jerky). No packed videos in V 1.2 — extension links are on the animal pages.
+
+## Still parked (not in V 1.2)
 
 - Canned / pressed ham
 - Bologna

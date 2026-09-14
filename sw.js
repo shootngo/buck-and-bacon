@@ -1,11 +1,17 @@
 /* Buck and Bacon service worker — cache name unique vs Nickey / Stashr */
-const CACHE = "buck-and-bacon-v1.1";
+const CACHE = "buck-and-bacon-v1.2";
 const SHELL = [
   "./",
   "./index.html",
   "./css/app.css",
   "./js/version.js",
   "./js/update.js",
+  "./js/routes.js",
+  "./js/wakelock.js",
+  "./js/cuts.js",
+  "./js/diagrams.js",
+  "./js/jerky.js",
+  "./js/phase2.js",
   "./js/math.js",
   "./js/recipes.js",
   "./js/scale.js",

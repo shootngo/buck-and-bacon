@@ -2,7 +2,7 @@
   "id": "/buck-and-bacon/",
   "name": "Buck and Bacon",
   "short_name": "Buck & Bacon",
-  "description": "Venison + pork sausage scaler — salt, computed Cure #1, seasonings, and casing footage.",
+  "description": "Butchering cut charts plus venison + pork sausage scaler — salt, computed Cure #1, seasonings, and casing footage.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

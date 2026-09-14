@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Buck and Bacon</title>
-  <meta name="description" content="Venison + pork sausage scaler. Salt, cure, seasonings, and casing footage for deer sausage.">
+  <meta name="description" content="Butchering cut charts plus venison + pork sausage scaler. Salt, cure, seasonings, and casing footage.">
   <meta name="theme-color" content="#121212">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -22,34 +22,46 @@
     <img src="splash.png" alt="Buck kicked back with a cigar">
     <div class="enter-wrap">
       <div class="brand">Buck and Bacon</div>
-      <div class="splash-version">V <span data-app-version>1.1</span></div>
+      <div class="splash-version">V <span data-app-version>1.2</span></div>
       <button type="button" class="enter" id="splash-enter">Enter</button>
     </div>
   </div>
 
   <div class="app">
+    <div class="chrome">
     <header class="header">
       <button type="button" class="icon-btn hidden" id="btn-back" aria-label="Back">←</button>
       <img class="logo" src="icon-192.png" alt="" width="44" height="44">
       <div class="grow">
         <h1 id="header-title">Buck and Bacon</h1>
-        <p class="sub" id="header-sub">Venison sausage scaler</p>
+        <p class="sub" id="header-sub">Butchering · sausage · jerky · cure</p>
       </div>
       <button type="button" class="icon-btn" id="btn-convert" aria-label="Unit converter">⚖</button>
       <button type="button" class="icon-btn" id="btn-menu" aria-label="Menu">☰</button>
     </header>
 
     <div id="menu" class="menu hidden">
-      <button type="button" data-go="home">Recipes</button>
+      <button type="button" data-go="butchering">Butchering</button>
+      <button type="button" data-go="sausage">Sausage recipes</button>
+      <button type="button" data-go="jerky">Jerky</button>
+      <button type="button" data-go="cure">Curing &amp; preserving</button>
       <button type="button" data-go="tools">Converters</button>
       <button type="button" data-go="about">Safety &amp; sources</button>
       <button type="button" data-action="check-update">Check for update</button>
-      <p class="menu-version">V <span data-app-version>1.1</span></p>
+      <p class="menu-version">V <span data-app-version>1.2</span></p>
+    </div>
+    <div id="stay-on-slot"></div>
     </div>
 
     <main>
-      <section id="view-home" class="view">
+      <section id="view-butchering" class="view">
+        <div id="butchering-root"></div>
+      </section>
+
+      <section id="view-home" class="view hidden">
         <img class="hero-splash" src="splash.png" alt="">
+        <p class="kicker">Sausage recipes</p>
+        <h2 class="recipe-title">Scale a batch</h2>
         <p class="lede">Enter pounds of venison and pork. The app scales salt, seasonings, and a computed Cure #1 amount for the recipe you pick.</p>
         <div id="recipe-list" class="recipe-list"></div>
       </section>
@@ -169,18 +181,38 @@
         <div id="m-results"></div>
       </section>
 
+      <section id="view-jerky" class="view hidden">
+        <div id="jerky-root"></div>
+      </section>
+
+      <section id="view-cure" class="view hidden">
+        <p class="kicker">Curing &amp; preserving</p>
+        <h2 class="recipe-title">Cure #1 calculator</h2>
+        <p class="lede">Same computed rate as the sausage recipes: 2.5 g Cure #1 per kg of meat (1 oz per 25 lb). Weigh on a gram scale. Confirm the jar in your hand is 6.25% nitrite.</p>
+        <div class="inputs">
+          <div class="field full">
+            <label for="cure-meat-lb">Meat (lb)</label>
+            <input id="cure-meat-lb" type="number" inputmode="decimal" min="0" step="0.1" placeholder="10">
+          </div>
+        </div>
+        <div id="cure-results"></div>
+        <div id="cure-extras"></div>
+      </section>
+
       <section id="view-about" class="view hidden">
         <img class="hero-splash" src="splash.png" alt="">
         <h2 class="recipe-title">Safety &amp; sources</h2>
         <div class="prose">
           <p><strong>Buck and Bacon</strong> is a home sausage scaler for Frank Mulkey. It is not USDA inspection, not a substitute for your cure product’s label, and not medical or legal advice.</p>
-          <p><strong>Version:</strong> V <span data-app-version>1.1</span>. Use <strong>Check for update</strong> in the ☰ menu anytime — you don’t have to wait for a banner.</p>
+          <p><strong>Version:</strong> V <span data-app-version>1.2</span>. Use <strong>Check for update</strong> in the ☰ menu anytime — you don’t have to wait for a banner.</p>
           <h2>Cure #1</h2>
           <p>Cure amounts are <em>computed</em>, never copied from recipes or videos. The app assumes <strong>Cure #1 (Prague Powder #1 / Instacure #1)</strong> at <strong>2.5 g per kg</strong> of total meat, which is the same rate as <strong>1 oz per 25 lb</strong> (~156 ppm sodium nitrite when the product is 6.25% nitrite).</p>
           <p>Confirm against the jar in your hand. Some pink salts are a different concentration. Do not use Cure #2 for these cooked/smoked sausages. Weigh cure on a gram scale.</p>
           <h2>DH Custom Sausage notes</h2>
           <p>Seasoning formulas follow Duncan Henry’s public method: ingredients as <strong>grams per kilogram of meat</strong> so the math stays in tenths. Shop videos are used for style (garlic kielbasa, snack sticks, breakfast sage), not for nitrite numbers.</p>
-          <h2>Phase 2 (not built)</h2>
+          <h2>What’s in V 1.2</h2>
+          <p>Butchering cut charts (deer, hog, beef, chicken), Screen stay-on, sausage recipes, a jerky starter, and this Cure #1 calculator.</p>
+          <h2>Still parked</h2>
           <ul>
             <li>Canned / pressed ham</li>
             <li>Bologna</li>
