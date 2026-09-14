@@ -1,9 +1,9 @@
 {
   "name": "buck-and-bacon",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
-  "description": "Venison + pork sausage scaler PWA (Phase 1)",
+  "description": "Butchering cut charts and venison + pork sausage scaler PWA",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "serve": "python3 -m http.server 8080"
