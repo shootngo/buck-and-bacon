@@ -170,7 +170,7 @@ function cureBadge(recipe) {
 function renderSausage() {
   showView("view-home");
   $("btn-back").classList.remove("hidden");
-  $("header-title").textContent = "Sausage recipes";
+  $("header-title").textContent = "Sausage";
   $("header-sub").textContent = "Scale a batch";
   $("recipe-list").innerHTML = RECIPES.map(
     (r) => `
