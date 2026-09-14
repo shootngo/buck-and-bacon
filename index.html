@@ -22,6 +22,7 @@
     <img src="splash.png" alt="Buck kicked back with a cigar">
     <div class="enter-wrap">
       <div class="brand">Buck and Bacon</div>
+      <div class="splash-version">V <span data-app-version>1.1</span></div>
       <button type="button" class="enter" id="splash-enter">Enter</button>
     </div>
   </div>
@@ -42,6 +43,8 @@
       <button type="button" data-go="home">Recipes</button>
       <button type="button" data-go="tools">Converters</button>
       <button type="button" data-go="about">Safety &amp; sources</button>
+      <button type="button" data-action="check-update">Check for update</button>
+      <p class="menu-version">V <span data-app-version>1.1</span></p>
     </div>
 
     <main>
@@ -171,6 +174,7 @@
         <h2 class="recipe-title">Safety &amp; sources</h2>
         <div class="prose">
           <p><strong>Buck and Bacon</strong> is a home sausage scaler for Frank Mulkey. It is not USDA inspection, not a substitute for your cure product’s label, and not medical or legal advice.</p>
+          <p><strong>Version:</strong> V <span data-app-version>1.1</span>. Use <strong>Check for update</strong> in the ☰ menu anytime — you don’t have to wait for a banner.</p>
           <h2>Cure #1</h2>
           <p>Cure amounts are <em>computed</em>, never copied from recipes or videos. The app assumes <strong>Cure #1 (Prague Powder #1 / Instacure #1)</strong> at <strong>2.5 g per kg</strong> of total meat, which is the same rate as <strong>1 oz per 25 lb</strong> (~156 ppm sodium nitrite when the product is 6.25% nitrite).</p>
           <p>Confirm against the jar in your hand. Some pink salts are a different concentration. Do not use Cure #2 for these cooked/smoked sausages. Weigh cure on a gram scale.</p>
@@ -189,6 +193,9 @@
       </section>
     </main>
   </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <button type="button" id="update-banner" class="update-banner hidden">New version available — tap to update</button>
 
   <div id="sheet-backdrop" class="sheet-backdrop hidden"></div>
   <div id="sheet" class="sheet hidden" role="dialog" aria-label="Unit converter">

@@ -1,9 +1,11 @@
 /* Buck and Bacon service worker — cache name unique vs Nickey / Stashr */
-const CACHE = "buck-and-bacon-v2";
+const CACHE = "buck-and-bacon-v1.1";
 const SHELL = [
   "./",
   "./index.html",
   "./css/app.css",
+  "./js/version.js",
+  "./js/update.js",
   "./js/math.js",
   "./js/recipes.js",
   "./js/scale.js",
@@ -42,15 +44,24 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   const isHTML =
     req.mode === "navigate" || url.pathname.endsWith("/") || url.pathname.endsWith(".html");
+  const isVersionProbe = url.pathname.endsWith("version.json");
 
   event.respondWith(
     (async () => {
+      if (isVersionProbe) {
+        return fetch(req, { cache: "no-store" });
+      }
+
       if (isHTML) {
         try {
           const fresh = await fetch(req);

@@ -21,6 +21,13 @@ import {
   getRecipe,
 } from "./recipes.js";
 import { scaleBatch } from "./scale.js";
+import {
+  APP_VERSION,
+  fetchRemoteVersion,
+  latestVersionMessage,
+  shouldActivateUpdate,
+  updateFoundMessage,
+} from "./update.js";
 
 const STORAGE = "bnb-v1";
 const $ = (id) => document.getElementById(id);
@@ -438,6 +445,124 @@ function render(opts = {}) {
   else if (state.view === "about") renderAbout();
 }
 
+function paintVersion() {
+  document.querySelectorAll("[data-app-version]").forEach((el) => {
+    el.textContent = APP_VERSION;
+  });
+}
+
+function showToast(message) {
+  const el = $("toast");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.remove("hidden");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => el.classList.add("hidden"), 3400);
+}
+
+let checkingUpdate = false;
+let pendingReload = false;
+
+function reloadApp() {
+  if (reloadApp._once) return;
+  reloadApp._once = true;
+  location.reload();
+}
+
+function activateAndReload(worker) {
+  pendingReload = true;
+  if (worker) worker.postMessage({ type: "SKIP_WAITING" });
+  setTimeout(reloadApp, 500);
+}
+
+function showUpdateBanner(worker) {
+  const banner = $("update-banner");
+  if (!banner || checkingUpdate) return;
+  banner.classList.remove("hidden");
+  banner.onclick = () => {
+    banner.textContent = "Updating…";
+    showToast(updateFoundMessage());
+    activateAndReload(worker);
+  };
+}
+
+function watchRegistration(reg) {
+  const onInstalled = (worker) => {
+    if (!worker || worker.state !== "installed") return;
+    if (!navigator.serviceWorker.controller) return;
+    if (checkingUpdate) activateAndReload(worker);
+    else showUpdateBanner(worker);
+  };
+  if (reg.waiting && navigator.serviceWorker.controller) {
+    showUpdateBanner(reg.waiting);
+  }
+  if (reg.installing) {
+    const installing = reg.installing;
+    installing.addEventListener("statechange", () => onInstalled(installing));
+  }
+  reg.addEventListener("updatefound", () => {
+    const worker = reg.installing;
+    if (!worker) return;
+    worker.addEventListener("statechange", () => onInstalled(worker));
+  });
+}
+
+async function checkForUpdate() {
+  $("menu").classList.add("hidden");
+  if (checkingUpdate) return;
+  checkingUpdate = true;
+  showToast("Checking for update…");
+
+  try {
+    let remoteVersion = null;
+    let remoteFetched = false;
+    try {
+      remoteVersion = await fetchRemoteVersion();
+      remoteFetched = true;
+    } catch {
+      remoteVersion = null;
+    }
+
+    let swChecked = false;
+    let worker = null;
+    if ("serviceWorker" in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg) {
+        try {
+          await reg.update();
+          swChecked = true;
+        } catch {
+          swChecked = false;
+        }
+        worker = reg.waiting || reg.installing;
+      }
+    }
+
+    const hasWaitingWorker = Boolean(worker);
+    if (shouldActivateUpdate({ remoteVersion, hasWaitingWorker })) {
+      showToast(updateFoundMessage(remoteVersion || APP_VERSION));
+      if (!hasWaitingWorker && "caches" in window) {
+        try {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k) => caches.delete(k)));
+        } catch {
+          /* ignore */
+        }
+      }
+      activateAndReload(worker);
+      return;
+    }
+
+    if (remoteFetched || swChecked) {
+      showToast(latestVersionMessage());
+    } else {
+      showToast("Couldn't check for an update right now.");
+    }
+  } finally {
+    checkingUpdate = false;
+  }
+}
+
 function bind() {
   $("btn-back").addEventListener("click", () => go("home"));
   $("btn-menu").addEventListener("click", (e) => {
@@ -447,7 +572,13 @@ function bind() {
   document.addEventListener("click", () => $("menu").classList.add("hidden"));
   $("menu").addEventListener("click", (e) => {
     e.stopPropagation();
-    const goTo = e.target.dataset.go;
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    if (btn.dataset.action === "check-update") {
+      checkForUpdate();
+      return;
+    }
+    const goTo = btn.dataset.go;
     if (goTo) go(goTo);
   });
   $("btn-convert").addEventListener("click", (e) => {
@@ -490,12 +621,22 @@ function bind() {
 }
 
 if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (pendingReload) reloadApp();
+  });
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((reg) => {
+        watchRegistration(reg);
+        reg.update().catch(() => {});
+      })
+      .catch(() => {});
   });
 }
 
 loadState();
+paintVersion();
 setupSplash();
 bind();
 parseHash();
